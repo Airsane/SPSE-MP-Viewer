@@ -115,5 +115,16 @@
     <% }) %>
 </div>
 
+<script>
+    document.addEventListener('load',async ()=>{
+        const data = await fetch('http://localhost:3000/api/websites')
+        for (const website of data) {
+            console.log(website)
+        }
+    })
+
+
+</script>
+
 </body>
 </html>
