@@ -17,13 +17,6 @@
             background: linear-gradient(to right, #ff9966, #ff5e62);
         }
 
-        .wrapper{
-            background: rgba(255, 255, 255, 0.21);
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-            backdrop-filter: blur(5px);
-            -webkit-backdrop-filter: blur(5px);
-        }
-
         div.url {
             display: flex;
             align-content: center;
@@ -87,41 +80,45 @@
 </head>
 <body>
 <div class="wrapper">
-    <% websites.forEach(({http,https})=>{ %>
-        <div class="url">
-            <h2><a href="<%= http.url %>"><%= http.url %></a> <%=      %></h2>
-            <% if(http.status == true){ %>
-                <div class="online-indicator">
-                    <span class="blink"></span>
-                </div>
-
-            <% } else { %>
-                <div class="offline-indicator">
-                    <span class="blink"></span>
-                </div>
-            <% } %>
-            <h2><a href="<%= https.url %>"><%= https.url %></a> <%=      %></h2>
-            <% if(https.status == true){ %>
-                <div class="online-indicator">
-                    <span class="blink"></span>
-                </div>
-
-            <% } else { %>
-                <div class="offline-indicator">
-                    <span class="blink"></span>
-                </div>
-            <% } %>
-        </div>
-    <% }) %>
 </div>
 
 <script>
-    document.addEventListener('load',async ()=>{
-        const data = await fetch('http://localhost:3000/api/websites')
-        for (const website of data) {
-            console.log(website)
+    window.addEventListener('load', async () => {
+        const data = await (await fetch('http://localhost:3000/api/websites')).json();
+        for (const {http, https} of data) {
+            const div1 = createUrlDiv(http, https);
+            document.querySelector('.wrapper').appendChild(div1);
         }
     })
+
+    const createUrlDiv = (urlData, urlData2) => {
+        const div = document.createElement('div');
+        div.classList.add('url');
+        createInnerContent(urlData, div);
+        createInnerContent(urlData2, div);
+        return div;
+    }
+
+    const createInnerContent = (data, div) => {
+        let h2 = document.createElement('h2');
+        let a = document.createElement('a');
+        a.href = data._url;
+        a.innerText = data._url;
+        h2.appendChild(a);
+        div.appendChild(h2);
+        const indicator = document.createElement('div');
+        if (data._status) {
+            indicator.classList.add('online-indicator');
+            const blink = document.createElement('span');
+            blink.classList.add('blink');
+            indicator.appendChild(blink);
+        } else {
+            indicator.classList.add('offline-indicator');
+            const span = document.createElement('span');
+            indicator.appendChild(span);
+        }
+        div.appendChild(indicator);
+    }
 
 
 </script>
