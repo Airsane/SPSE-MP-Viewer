@@ -1,18 +1,17 @@
-import URLFormatter from "./URLFormatter";
-import SPSEURLGrabber from "./SPSEURLGrabber";
 import WebSite from "./WebSite";
 import express, {Express, Request, Response} from 'express';
+import SPSEURLLoader from "./SPSEURLLoader";
 
-const websites: { http: WebSite, https: WebSite }[] = [];
-(async () => {
-    const urls = await SPSEURLGrabber.grabURLs();
+const websites: { https: WebSite }[] = [];
+
+
+const loadWebsites = () => {
+    const urls = SPSEURLLoader();
     for (const url of urls) {
-        websites.push(
-            {http: new WebSite(URLFormatter.format(url).http), https: new WebSite(URLFormatter.format(url).https)});
+        websites.push({https: new WebSite(url)});
     }
-
-
-})();
+    console.log("Websites loaded successfully from file data.json " + websites.length);
+}
 
 
 const app: Express = express();
@@ -22,14 +21,16 @@ app.get('/', (req: Request, res: Response) => {
 });
 
 app.get('/api/websites', async (req: Request, res: Response) => {
-    for (const {http, https} of websites) {
-        await http.isOnline();
+    if (websites.length === 0) {
+        loadWebsites();
+    }
+    for (const {https} of websites) {
         await https.isOnline();
     }
 
     //sort by online status
     websites.sort((a, b) => {
-        return a.http.status === b.http.status ? 0 : a.http.status ? -1 : 1;
+        return a.https.status === b.https.status ? 0 : a.https.status ? -1 : 1;
     });
 
     res.json(websites);

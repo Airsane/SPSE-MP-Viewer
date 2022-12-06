@@ -1,4 +1,5 @@
 import {get} from "./Utils";
+import * as cheerio from 'cheerio';
 
 export default class WebSite {
     private readonly _url: string;
@@ -23,8 +24,14 @@ export default class WebSite {
             return this._status;
         }
         try {
-            await get(this._url);
-            this._status = true;
+            const {data} = (await get(this._url));
+            const $ = cheerio.load(data);
+            const title = $('body > h1');
+            if(title){
+                this._status = !(title.text() === this._url.split('//')[1]);
+            }else{
+                this._status = true;
+            }
             return true;
         } catch (error) {
             this._status = false;

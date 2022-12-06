@@ -86,15 +86,14 @@
     window.addEventListener('load', async () => {
         const data = await (await fetch('http://localhost:3000/api/websites')).json();
         for (const {http, https} of data) {
-            const div1 = createUrlDiv(http, https);
+            const div1 = createUrlDiv(https);
             document.querySelector('.wrapper').appendChild(div1);
         }
     })
 
-    const createUrlDiv = (urlData, urlData2) => {
+    const createUrlDiv = (urlData2) => {
         const div = document.createElement('div');
         div.classList.add('url');
-        createInnerContent(urlData, div);
         createInnerContent(urlData2, div);
         return div;
     }
