@@ -4,51 +4,79 @@ import SPSEURLLoader from "./SPSEURLLoader";
 import path from "path";
 import axios from "axios";
 import dotenv from "dotenv";
+
+// Initialize environment variables
 dotenv.config();
-const websites: { https: WebSite, classxD: string }[] = [];
 
-
-const loadWebsites = async () => {
-    const urls = await SPSEURLLoader();
-    for (const url of urls) {
-        websites.push({ https: new WebSite(url.url), classxD: url.classxD });
-    }
-    console.log("Website loaded successfully from file data.json " + websites.length);
+// Types
+interface Website {
+    https: WebSite;
+    classxD: string;
 }
 
+// Constants
+const PORT = process.env.PORT || 3000;
+const WEBSITES_URL = process.env.WEBSITES_URL || "";
+const API_URL = process.env.API_URL;
 
+// State
+const websites: Website[] = [];
+
+// Website loading
+const loadWebsites = async (): Promise<void> => {
+    const urls = await SPSEURLLoader();
+    urls.forEach(url => {
+        websites.push({ 
+            https: new WebSite(url.url), 
+            classxD: url.classxD 
+        });
+    });
+    console.log(`Websites loaded successfully from data.json: ${websites.length}`);
+}
+
+// Sort websites by online status
+const sortByOnlineStatus = (data: Website[]): Website[] => {
+    return [...data].sort((a, b) => 
+        a.https.status === b.https.status ? 0 : a.https.status ? -1 : 1
+    );
+}
+
+// Express app setup
 const app: Express = express();
 app.set('views', path.join(process.cwd(), 'views'));
 app.set('view engine', 'ejs');
+
+// Routes
 app.get('/', (req: Request, res: Response) => {
-    res.render('pages/index', { websites, url: process.env.API_URL });
+    res.render('pages/index', { websites, url: API_URL });
 });
 
 app.get('/api/websites', async (req: Request, res: Response) => {
-    const url = process.env.WEBSITES_URL || "";
-    const data:{ https: WebSite, classxD: string }[] = (await axios.get(url)).data;
-
-    //sort by online status
-    data.sort((a, b) => {
-        return a.https.status === b.https.status ? 0 : a.https.status ? -1 : 1;
-    });
-
-    res.json(data);
-
-})
+    try {
+        const { data } = await axios.get<Website[]>(WEBSITES_URL);
+        res.json(sortByOnlineStatus(data));
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch websites' });
+    }
+});
 
 app.get('/api/load', async (req: Request, res: Response) => {
-    if (websites.length === 0) {
-        await loadWebsites();
+    try {
+        if (websites.length === 0) {
+            await loadWebsites();
+        }
+        
+        await Promise.all(
+            websites.map(({ https }) => https.isOnline())
+        );
+        
+        res.json(websites);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to load websites' });
     }
-    for (const { https } of websites) {
-        await https.isOnline();
-    }
-    res.json(websites);
-})
+});
 
-
-app.listen(process.env.PORT || 3000, () => {
-    console.log('Server is running...');
-
+// Start server
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}...`);
 });

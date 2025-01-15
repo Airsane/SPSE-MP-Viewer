@@ -9,30 +9,39 @@ export default class WebSite {
         this._url = url;
     }
 
-
     get url(): string {
         return this._url;
     }
-
 
     get status(): boolean | null {
         return this._status;
     }
 
-    public async isOnline(): Promise<Boolean> {
+    private extractDomainFromUrl(): string {
+        return this._url.split('//')[1];
+    }
+
+    private async checkWebsiteContent(): Promise<boolean> {
+        const {data} = await get(this._url);
+        const $ = cheerio.load(data);
+        const title = $('body > h1');
+
+        if (!title.length) {
+            return true;
+        }
+
+        const titleText = title.text();
+        return titleText !== this.extractDomainFromUrl();
+    }
+
+    public async isOnline(): Promise<boolean> {
         if (this._status !== null) {
             return this._status;
         }
+
         try {
-            const {data} = (await get(this._url));
-            const $ = cheerio.load(data);
-            const title = $('body > h1');
-            if(title){
-                this._status = !(title.text() === this._url.split('//')[1]);
-            }else{
-                this._status = true;
-            }
-            return true;
+            this._status = await this.checkWebsiteContent();
+            return this._status;
         } catch (error) {
             this._status = false;
             return false;
