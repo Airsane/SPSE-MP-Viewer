@@ -1,7 +1,11 @@
+import axios from "axios";
 import * as fs from "fs";
+import https from "https";
 
-const getUrls = (): {url: string, classxD:string}[] => {
-    const data: { firstName: string, lastName: string, shortcut: string, class: string }[] = JSON.parse(fs.readFileSync('./data.json', 'utf8'));
+const getUrls = async (): Promise<{url: string, classxD:string}[]> => {
+    // axios ignore certificate errors
+    axios.defaults.httpsAgent = new https.Agent({rejectUnauthorized: false});
+    const data: { firstName: string, lastName: string, shortcut: string, class: string }[] = (await axios.get("https://jsonkeeper.com/b/W3WK")).data;
     const urls: {url: string, classxD:string}[] = [];
     data.forEach((student)=>{
         // convert lastname to lowercase remove spaces and replace non utf-8 characters with utf for example "á" -> "a" and max 6 characters

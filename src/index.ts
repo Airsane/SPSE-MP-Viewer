@@ -1,14 +1,14 @@
 import WebSite from "./WebSite";
-import express, {Express, Request, Response} from 'express';
+import express, { Express, Request, Response } from 'express';
 import SPSEURLLoader from "./SPSEURLLoader";
 
 const websites: { https: WebSite, classxD: string }[] = [];
 
 
-const loadWebsites = () => {
-    const urls = SPSEURLLoader();
+const loadWebsites = async () => {
+    const urls = await SPSEURLLoader();
     for (const url of urls) {
-        websites.push({https: new WebSite(url.url), classxD:url.classxD});
+        websites.push({ https: new WebSite(url.url), classxD: url.classxD });
     }
     console.log("Websites loaded successfully from file data.json " + websites.length);
 }
@@ -17,14 +17,14 @@ const loadWebsites = () => {
 const app: Express = express();
 app.set('view engine', 'ejs');
 app.get('/', (req: Request, res: Response) => {
-    res.render('pages/index', {websites});
+    res.render('pages/index', { websites });
 });
 
 app.get('/api/websites', async (req: Request, res: Response) => {
     if (websites.length === 0) {
-        loadWebsites();
+        await loadWebsites();
     }
-    for (const {https} of websites) {
+    for (const { https } of websites) {
         await https.isOnline();
     }
 
