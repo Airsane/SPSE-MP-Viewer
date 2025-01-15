@@ -129,7 +129,7 @@
 
 <script>
     window.addEventListener('load', async () => {
-        const data = await (await fetch('http://localhost:3000/api/websites')).json();
+        const data = await (await fetch('https://spse-mp-viewer-chi.vercel.app/api/websites')).json();
         for (const {https, classxD} of data) {
             const div1 = createUrlDiv(https, classxD);
             document.querySelector('.wrapper').appendChild(div1);
