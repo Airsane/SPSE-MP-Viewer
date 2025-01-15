@@ -26,7 +26,8 @@ export default class WebSite {
 
         try {
             const response = await axios.get(this._url, {
-                                validateStatus: null // Don't throw on any status code
+                timeout: 5000, // 5 second timeout
+                validateStatus: null // Don't throw on any status code
             });
             
             // Consider 2xx status codes as online
