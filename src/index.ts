@@ -35,10 +35,17 @@ const loadWebsites = async (): Promise<void> => {
 }
 
 // Sort websites by online status
-const sortByOnlineStatus = (data: Website[]): Website[] => {
-    return [...data].sort((a, b) => 
-        a.https.status === b.https.status ? 0 : a.https.status ? -1 : 1
-    );
+const sortByOnlineStatus = (data: {https: {_status: boolean | null}, classxD: string}[]): {https: {_status: boolean | null}, classxD: string}[] => {
+    return [...data].sort((a, b) => {
+        // Handle null cases first
+        if (a.https._status === null && b.https._status === null) return 0;
+        if (a.https._status === null) return 1;
+        if (b.https._status === null) return -1;
+        
+        // Then sort by online status (true comes before false)
+        return b.https._status === a.https._status ? 0 : 
+               b.https._status ? 1 : -1;
+    });
 }
 
 // Express app setup
@@ -53,7 +60,7 @@ app.get('/', (req: Request, res: Response) => {
 
 app.get('/api/websites', async (req: Request, res: Response) => {
     try {
-        const { data } = await axios.get<Website[]>(WEBSITES_URL);
+        const { data } = await axios.get<{https: {_status: boolean | null}, classxD: string}[]>(WEBSITES_URL);
         res.json(sortByOnlineStatus(data));
     } catch (error) {
         res.status(500).json({ error: 'Failed to fetch websites' });
