@@ -2,13 +2,13 @@ import WebSite from "./WebSite";
 import express, {Express, Request, Response} from 'express';
 import SPSEURLLoader from "./SPSEURLLoader";
 
-const websites: { https: WebSite }[] = [];
+const websites: { https: WebSite, classxD: string }[] = [];
 
 
 const loadWebsites = () => {
     const urls = SPSEURLLoader();
     for (const url of urls) {
-        websites.push({https: new WebSite(url)});
+        websites.push({https: new WebSite(url.url), classxD:url.classxD});
     }
     console.log("Websites loaded successfully from file data.json " + websites.length);
 }
