@@ -3,11 +3,7 @@
   "builds": [
     {
       "src": "./build/index.js",
-      "use": "@vercel/node",
-      "config": {
-        "buildCommand": "tsc",
-        "outputDirectory": "build"
-      }
+      "use": "@vercel/node"
     }
   ],
   "routes": [
@@ -16,8 +12,8 @@
       "dest": "./build/index.js"
     },
     {
-      "src": "/(.*)", 
-      "dest": "./build/index.js"
+      "src": "/(.*)",
+      "dest": "./views/pages/index.ejs"
     }
   ]
 }
