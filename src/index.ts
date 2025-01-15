@@ -3,6 +3,8 @@ import express, { Express, Request, Response } from 'express';
 import SPSEURLLoader from "./SPSEURLLoader";
 import path from "path";
 import axios from "axios";
+import dotenv from "dotenv";
+dotenv.config();
 const websites: { https: WebSite, classxD: string }[] = [];
 
 
@@ -19,11 +21,11 @@ const app: Express = express();
 app.set('views', path.join(process.cwd(), 'views'));
 app.set('view engine', 'ejs');
 app.get('/', (req: Request, res: Response) => {
-    res.render('pages/index', { websites });
+    res.render('pages/index', { websites, url: process.env.API_URL });
 });
 
 app.get('/api/websites', async (req: Request, res: Response) => {
-    const url = "https://api.npoint.io/69d61602a1eaf752c4be";
+    const url = process.env.WEBSITES_URL || "";
     const data:{ https: WebSite, classxD: string }[] = (await axios.get(url)).data;
 
     //sort by online status
