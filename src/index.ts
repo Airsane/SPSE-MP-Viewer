@@ -10,7 +10,7 @@ const loadWebsites = async () => {
     for (const url of urls) {
         websites.push({ https: new WebSite(url.url), classxD: url.classxD });
     }
-    console.log("Websites loaded successfully from file data.json " + websites.length);
+    console.log("Website loaded successfully from file data.json " + websites.length);
 }
 
 
