@@ -129,41 +129,53 @@
 
 <script>
     window.addEventListener('load', async () => {
-        const data = await (await fetch(`<%=url%>api/websites`)).json();
-        for (const {https, classxD} of data) {
-            const div1 = createUrlDiv(https, classxD);
-            document.querySelector('.wrapper').appendChild(div1);
+        try {
+            const response = await fetch(`<%=url%>api/websites`);
+            const websites = await response.json();
+            const wrapper = document.querySelector('.wrapper');
+            
+            websites.forEach(({https, classxD}) => {
+                const websiteElement = createWebsiteElement(https, classxD);
+                wrapper.appendChild(websiteElement);
+            });
+        } catch (error) {
+            console.error('Failed to load websites:', error);
         }
-    })
+    });
 
-    const createUrlDiv = (urlData2, classxD) => {
-        const div = document.createElement('div');
-        div.classList.add('url');
-        createInnerContent(urlData2, div, classxD);
-        return div;
-    }
+    const createWebsiteElement = (websiteData, className) => {
+        const container = document.createElement('div');
+        container.classList.add('url');
+        
+        const heading = createHeading(websiteData, className);
+        const statusIndicator = createStatusIndicator(websiteData._status);
+        
+        container.append(heading, statusIndicator);
+        return container;
+    };
 
-    const createInnerContent = (data, div, classxD) => {
-        let h2 = document.createElement('h2');
-        let a = document.createElement('a');
-        a.href = data._url;
-        a.target = "_blank";
-        a.innerText = data._url + " (" + classxD + ")";
-        h2.appendChild(a);
-        div.appendChild(h2);
+    const createHeading = (websiteData, className) => {
+        const heading = document.createElement('h2');
+        const link = document.createElement('a');
+        link.href = websiteData._url;
+        link.target = "_blank";
+        link.textContent = `${websiteData._url} (${className})`;
+        heading.appendChild(link);
+        return heading;
+    };
+
+    const createStatusIndicator = (isOnline) => {
         const indicator = document.createElement('div');
-        if (data._status) {
-            indicator.classList.add('online-indicator');
-            const blink = document.createElement('span');
-            blink.classList.add('blink');
-            indicator.appendChild(blink);
-        } else {
-            indicator.classList.add('offline-indicator');
-            const span = document.createElement('span');
-            indicator.appendChild(span);
+        indicator.classList.add(isOnline ? 'online-indicator' : 'offline-indicator');
+        
+        const statusDot = document.createElement('span');
+        if (isOnline) {
+            statusDot.classList.add('blink');
         }
-        div.appendChild(indicator);
-    }
+        indicator.appendChild(statusDot);
+        
+        return indicator;
+    };
 </script>
 
 </body>
