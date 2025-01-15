@@ -1,7 +1,7 @@
 import WebSite from "./WebSite";
 import express, { Express, Request, Response } from 'express';
 import SPSEURLLoader from "./SPSEURLLoader";
-
+import path from "path";
 const websites: { https: WebSite, classxD: string }[] = [];
 
 
@@ -15,6 +15,7 @@ const loadWebsites = async () => {
 
 
 const app: Express = express();
+app.set('views', path.join(process.cwd(), 'views'));
 app.set('view engine', 'ejs');
 app.get('/', (req: Request, res: Response) => {
     res.render('pages/index', { websites });
